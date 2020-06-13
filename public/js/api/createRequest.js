@@ -18,7 +18,6 @@ const createRequest = (options = {}) => {
 
    const xhr = new XMLHttpRequest();
    xhr.withCredentials = true;
-   xhr.open(options.method, url);
 
 // Устанавливаем заголовки, если есть.
    if (options.hasOwnProperty('headers'))
@@ -28,14 +27,30 @@ const createRequest = (options = {}) => {
    if (options.hasOwnProperty('responseType')) xhr.responseType = options.responseType;
 
    xhr.addEventListener('readystatechange', () => {
-      if (xhr.status !== 200) options.callback(new Error(`${xhr.status} ${xhr.statusText}`));
-      if (xhr.readyState === xhr.DONE && xhr.status === 200) options.callback('', xhr.response);
+      console.log('Статус запроса: ',xhr.readyState, xhr.status, xhr.statusText);
+      if (xhr.status !== 200) {
+         options.callback(new Error(`${xhr.status} ${xhr.statusText}`));
+         return xhr;
+      }
+      if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+         options.callback('', xhr.response);
+         return xhr;
+      }
    });
 
-   xhr.send(requestBody);
+   try {
+      xhr.open(options.method, url);
+      xhr.send(requestBody);
+   } catch (err) {
+      console.log('Ошибка запроса');
+      options.callback(new Error(err));
+   }
+
+
 
 };
 
+/*
 createRequest({
    url: 'user/login',
 //   headers: { // произвольные заголовки, могут отсутствовать
@@ -52,4 +67,4 @@ createRequest({
       else console.log( 'Данные, если нет ошибки', response );
    }
 });
-
+*/

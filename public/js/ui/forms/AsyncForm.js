@@ -13,7 +13,8 @@ class AsyncForm {
    * через registerEvents()
    * */
   constructor( element ) {
-
+    if (element) this.element = element;
+    else console.log('Modal error: в конструктор не передан element');
   }
 
   /**
@@ -21,6 +22,10 @@ class AsyncForm {
    * вызывает метод submit()
    * */
   registerEvents() {
+    this.element.addEventListener('submit', (event) => {
+      event.preventDefault();
+      this.submit();
+    })
 
   }
 
@@ -32,7 +37,13 @@ class AsyncForm {
    * }
    * */
   getData() {
+    const formData = new FormData(this.element);
+    const result = {};
+    for (const [key, value] of formData) {
+      result[key] = value;
+    }
 
+    return result;
   }
 
   onSubmit( options ) {
@@ -44,6 +55,6 @@ class AsyncForm {
    * данные, полученные из метода getData()
    * */
   submit() {
-
+    this.onSubmit({data: this.getData()});
   }
 }

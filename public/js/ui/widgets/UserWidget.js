@@ -11,7 +11,8 @@ class UserWidget {
    * необходимо выкинуть ошибку.
    * */
   constructor( element ) {
-
+    if (element) this.element = element;
+    else console.log('UserWidget error: в конструктор не передан element');
   }
 
   /**
@@ -22,6 +23,6 @@ class UserWidget {
    * авторизованного пользователя
    * */
   update() {
-
+    if (User.current()) document.getElementsByClassName('user-name')[0].textContent = User.current().name;
   }
 }

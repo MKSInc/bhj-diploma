@@ -10,12 +10,32 @@
     {
       "password": "odinodin",
       "id": "sb8jokb7yjg23",
-      "isAuthorized": true
+      "isAuthorized": false
     },
     {
       "password": "odinodin",
       "id": "sb89ckb7ykgdy",
-      "isAuthorized": true
+      "isAuthorized": false
+    },
+    {
+      "name": "MKS",
+      "email": "demo2@demo2",
+      "password": "demo2",
+      "id": "sb9d4kb9n6i3h",
+      "isAuthorized": false
+    },
+    {
+      "email": "demo3@demo3",
+      "password": "demo3",
+      "id": "sba78kb9ndwux",
+      "isAuthorized": false
+    },
+    {
+      "name": "Demo",
+      "email": "demo4@demo4",
+      "password": "demo4",
+      "id": "sb9cokbcpcrhy",
+      "isAuthorized": false
     }
   ],
   "accounts": [
