@@ -13,20 +13,29 @@ class AsyncForm {
    * через registerEvents()
    * */
   constructor( element ) {
-    if (element) this.element = element;
-    else console.log('Modal error: в конструктор не передан element');
+    if (!element) console.log('AsyncForm error: в конструктор не передан element');
+    else {
+      this.element = element;
+      this.submit = this.submit.bind(this);
+    }
+
   }
 
   /**
    * Необходимо запретить отправку формы. В момент отправки
    * вызывает метод submit()
+   * Добавлен сразу вызов метода submit() (без стрелочной функции), чтобы потом можно было удалить событие.
    * */
   registerEvents() {
-    this.element.addEventListener('submit', (event) => {
-      event.preventDefault();
-      this.submit();
-    })
+    this.element.addEventListener('submit', this.submit);
+  }
 
+  /**
+   * Добавлен метод unregisterEvents
+   * Удаляет событие 'submit' формы после запроса или закрытия модального окна с этой формой.
+   * */
+  unregisterEvents() {
+    this.element.removeEventListener('submit', this.submit);
   }
 
   /**
@@ -54,7 +63,8 @@ class AsyncForm {
    * Вызывает метод onSubmit и передаёт туда
    * данные, полученные из метода getData()
    * */
-  submit() {
+  submit( e ) {
+    e.preventDefault();
     this.onSubmit({data: this.getData()});
   }
 }

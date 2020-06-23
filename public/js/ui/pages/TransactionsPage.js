@@ -11,14 +11,20 @@ class TransactionsPage {
    * через registerEvents()
    * */
   constructor( element ) {
-
+    if (!element) console.log('TransactionsPage error: в конструктор не передан element');
+    else {
+      this.element = element;
+  //  В lastOptions хранится id активного (выбранного) счета, если он есть.
+      this.lastOptions = undefined;
+      this.registerEvents();
+    }
   }
 
   /**
    * Вызывает метод render для отрисовки страницы
    * */
   update() {
-
+    this.render(this.lastOptions);
   }
 
   /**
@@ -28,7 +34,12 @@ class TransactionsPage {
    * TransactionsPage.removeAccount соответственно
    * */
   registerEvents() {
-
+    this.element.addEventListener('click', event => {
+      const buttonEl = event.target.closest('button');
+      if (buttonEl)
+        if (buttonEl.classList.contains('remove-account')) this.removeAccount();
+        else if (buttonEl.classList.contains('transaction__remove')) this.removeTransaction(buttonEl.dataset.id);
+    });
   }
 
   /**
@@ -40,7 +51,18 @@ class TransactionsPage {
    * для обновления приложения
    * */
   removeAccount() {
-
+    if (confirm('Вы действительно хотите удалить счёт?')) {
+      Account.remove(this.lastOptions.account_id, {}, (err, response) => {
+        if (err) console.log('TransactionsPage.removeAccount ошибка в запросе: ', err);
+        else {
+          if (!response.success) console.log('TransactionsPage.removeAccount response.error: ', response.error);
+          else {
+            App.getPage('transactions').lastOptions = undefined;
+            App.update();
+          }
+        }
+      });
+    }
   }
 
   /**
@@ -49,7 +71,17 @@ class TransactionsPage {
    * По удалению транзакции вызовите метод App.update()
    * */
   removeTransaction( id ) {
-
+    if (confirm('Вы действительно хотите удалить эту транзакцию?')) {
+      Transaction.remove(id, {}, (err, response) => {
+        if (err) console.log('TransactionsPage.removeTransaction ошибка в запросе: ', err);
+        else {
+          if (!response.success) console.log('TransactionsPage.removeTransaction response.error: ', response.error);
+          else {
+            App.update();
+          }
+        }
+      });
+    }
   }
 
   /**
@@ -59,23 +91,48 @@ class TransactionsPage {
    * в TransactionsPage.renderTransactions()
    * */
   render( options ) {
+//  console.log('TransactionsPage.render run');
+    if (!options) {
+      console.log('TransactionsPage.render нет user_id (lastOptions еще пуст)');
+      return;
+    } else {
+        Account.get(options.account_id, {}, (err, response) => {
+          if (err) console.log('TransactionsPage.render Account.get ошибка в запросе: ', err);
+          else {
+            if (!response.success) console.log('TransactionsPage.render Account.get response.error: ', response.error);
+            else this.renderTitle(response.data.name);
+          }
+        });
 
+        Transaction.list(options, (err, response) => {
+          if (err) console.log('TransactionsPage.render Transaction.list ошибка в запросе: ', err);
+          else {
+            if (!response.success) console.log('TransactionsPage.render Transaction.list response.error: ', response.error);
+            else this.renderTransactions(response.data);
+          }
+        });
+      }
   }
 
   /**
    * Очищает страницу. Вызывает
    * TransactionsPage.renderTransactions() с пустым массивом.
    * Устанавливает заголовок: «Название счёта»
+   * Добавлено: Делает кнопку "Удалить счет" неактивной.
+   * Данный метод вызывается, если у пользователя удалены все счета.
    * */
   clear() {
-
+    this.renderTransactions([]);
+    this.renderTitle('Название счёта');
+    this.lastOptions = undefined;
+    this.element.getElementsByClassName('remove-account')[0].disabled = true;
   }
 
   /**
    * Устанавливает заголовок в элемент .content-title
    * */
   renderTitle( name ) {
-
+    this.element.getElementsByClassName('content-title')[0].textContent = name;
   }
 
   /**
@@ -83,7 +140,15 @@ class TransactionsPage {
    * в формат «10 марта 2019 г. в 03:20»
    * */
   formatDate( date ) {
-
+    let options = {
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric',
+      timezone: 'UTC',
+      hour: 'numeric',
+      minute: 'numeric',
+    };
+    return new Date(date).toLocaleDateString("ru", options);
   }
 
   /**
@@ -91,7 +156,31 @@ class TransactionsPage {
    * item - объект с информацией о транзакции
    * */
   getTransactionHTML( item ) {
-
+    return `
+      <div class="transaction transaction_${item.type.toLowerCase()} row">
+        <div class="col-md-7 transaction__details">
+          <div class="transaction__icon">
+            <span class="fa fa-money fa-2x"></span>
+          </div>
+          <div class="transaction__info">
+            <h4 class="transaction__title">${item.name}</h4>
+            <!-- дата -->
+            <div class="transaction__date">${this.formatDate(item.created_at)}</div>
+          </div>
+        </div>
+        <div class="col-md-3">
+          <div class="transaction__summ">
+            <!--  сумма -->
+            ${item.sum} <span class="currency">руб.</span>
+          </div>
+        </div>
+        <div class="col-md-2 transaction__controls">
+          <!-- в data-id нужно поместить id -->
+          <button class="btn btn-danger transaction__remove" data-id="${item.id}">
+            <i class="fa fa-trash"></i>  
+          </button>
+        </div>
+      </div>`
   }
 
   /**
@@ -99,6 +188,8 @@ class TransactionsPage {
    * используя getTransactionHTML
    * */
   renderTransactions( data ) {
-
+      let transactionsHTML ='';
+      data.forEach(transaction => transactionsHTML += this.getTransactionHTML(transaction));
+      this.element.getElementsByClassName('content')[0].innerHTML = transactionsHTML;
   }
 }

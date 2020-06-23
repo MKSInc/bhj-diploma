@@ -27,8 +27,9 @@ const createRequest = (options = {}) => {
    if (options.hasOwnProperty('responseType')) xhr.responseType = options.responseType;
 
    xhr.addEventListener('readystatechange', () => {
-      console.log('Статус запроса: ',xhr.readyState, xhr.status, xhr.statusText);
-      if (xhr.status !== 200) {
+   // console.log(xhr.readyState, xhr.status, xhr.statusText);
+   // До завершения запроса xhr.status выдает 0. Поэтому при xhr.readyState === 1 за ошибку это не учитывать.
+      if (xhr.status !== 200 && xhr.readyState !== 1) {
          options.callback(new Error(`${xhr.status} ${xhr.statusText}`));
          return xhr;
       }
@@ -45,26 +46,4 @@ const createRequest = (options = {}) => {
       console.log('Ошибка запроса');
       options.callback(new Error(err));
    }
-
-
-
 };
-
-/*
-createRequest({
-   url: 'user/login',
-//   headers: { // произвольные заголовки, могут отсутствовать
-//      'Content-type': 'application/json'
-//   },
-   data: {
-      mail: 'ivan@biz.pro',
-      password: 'odinodin'
-   },
-   responseType: 'json',
-   method: 'POST',
-   callback: (err, response) => {
-      if (err) console.log( 'Ошибка, если есть', err );
-      else console.log( 'Данные, если нет ошибки', response );
-   }
-});
-*/

@@ -23,7 +23,6 @@ class Sidebar {
       bodyEl.classList.toggle('sidebar-open');
       bodyEl.classList.toggle('sidebar-collapse');
     });
-
   }
 
   /**
@@ -34,40 +33,37 @@ class Sidebar {
    * выходу устанавливает App.setState( 'init' )
    * */
   static initAuthLinks() {
-//  Нажатие на кнопку "Регистрация".
-    document.getElementsByClassName('menu-item_register')[0].addEventListener('click', () => {
-      const modalRegister = new Modal(App.getModal('register').element);
-      modalRegister.open();
-      modalRegister.registerEvents();
+    const sidebarMenuEl = document.getElementsByClassName('menu-item_login')[0].closest('.sidebar-menu');
 
-      const registerForm = new RegisterForm(document.getElementById('register-form'));
-      registerForm.registerEvents();
-    });
-
-//  Нажатие на кнопку "Войти".
-    document.getElementsByClassName('menu-item_login')[0].addEventListener('click', () => {
-      const modalLogin = new Modal(App.getModal('login').element);
-      modalLogin.open();
-      modalLogin.registerEvents();
-
-      const loginForm = new LoginForm(document.getElementById('login-form'));
-      loginForm.registerEvents();
-    });
-
-//  Нажатие на кнопку "Выйти".
-    document.getElementsByClassName('menu-item_logout')[0].addEventListener('click', () => {
-      User.logout({}, (err, response) => {
-        if (err) console.log('User.logout ошибка в запросе: ', err);
-        else {
-          if (response.success) { // <---------------------------------- Зачем нужен запрос?
-            console.log(response);
-            User.unsetCurrent();
-            App.setState('init');
+    sidebarMenuEl.addEventListener('click', event => {
+      const target = event.target.closest('li');
+  //  Нажатие на кнопку "Выйти".
+      if (target.classList.contains('menu-item_logout')) {
+        User.logout({}, (err, response) => {
+          if (err) console.log('User.logout ошибка в запросе: ', err);
+          else {
+            if (response.success) {
+              User.unsetCurrent();
+              App.setState('init');
+          //  Убираем информацию о последнем активном (выбранном) счете.
+              App.getPage('transactions').lastOptions = undefined;
+            }
+            else console.log('User.logout response.error: ', response.error);
           }
-          else console.log('User.logout response.error: ', response.error);
-        }
-      })
-    });
-  }
+        });
+        return;
 
+      } else if (target.classList.contains('menu-item')) {
+
+    //  Если нажата кнопка "Войти".
+        if (target.classList.contains('menu-item_login')) {
+          App.getModal('login').open();
+
+      //  Если нажата кнопка "Регистрация".
+        } else if (target.classList.contains('menu-item_register')) {
+          App.getModal('register').open();
+        }
+      }
+    })
+  }
 }

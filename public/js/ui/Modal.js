@@ -13,8 +13,13 @@ class Modal {
    * необходимо выкинуть ошибку.
    * */
   constructor( element ) {
-    if (element) this.element = element;
-    else console.log('Modal error: в конструктор не передан element');
+    if (!element) console.log('Modal error: в конструктор не передан element');
+    else {
+      this.element = element;
+  //  Чтобы реализовать удаление событий а так же вызов методов close и unregisterEvents в методе onClose
+  //  приходиться использовать еще не пройденный встроенный метод bind.
+      this.onClose = this.onClose.bind(this);
+    }
   }
 
   /**
@@ -33,12 +38,9 @@ class Modal {
    * */
   onClose( e ) {
     e.preventDefault();
-//  Как вызвать эти методы?
-//  Если в обработчике событий метод onClose вызвать через стрелочную функцию, то методы будут видны,
-//  но тогда эти события нельзя удалить.
-    this.unregisterEvents(); // Не стработает, так как контекстом onClose будет нажатый элемент.
-    this.close(); // Не сработает
+    this.close();
   }
+
   /**
    * Удаляет обработчики событий
    * */
@@ -46,18 +48,42 @@ class Modal {
     const closeModalEls = this.element.querySelectorAll('[data-dismiss=modal]');
     for (const closeModalEl of closeModalEls) closeModalEl.removeEventListener('click', this.onClose);
   }
+
   /**
    * Открывает окно: устанавливает CSS-свойство display
    * со значением «block»
+   * Добавлена регистрация событий для модального окна.
+   * Добавлена регистрация событий для формы модального окна.
    * */
   open() {
     this.element.style.display = 'block';
+    this.registerEvents();
+    App.getForm(this.getFormName()).registerEvents();
   }
+
   /**
    * Закрывает окно: удаляет CSS-свойство display
+   * Добавлено удаление событий модального окна.
+   * Добавлено удаление событий формы модального окна.
    * */
   close() {
+    App.getForm(this.getFormName()).unregisterEvents();
+
+    this.unregisterEvents();
     this.element.style.removeProperty('display');
   }
-}
 
+  /**
+   * Добавлен метод getFormName()
+   * Возвращает имя формы модального окна.
+   * */
+  getFormName() {
+    switch (this.element.dataset.modalId) {
+      case 'login': return 'login';
+      case 'register': return 'register';
+      case 'newAccount': return 'createAccount';
+      case 'newIncome': return 'createIncome';
+      case 'newExpense': return 'createExpense';
+    }
+  }
+}

@@ -3,7 +3,6 @@
  * Имеет свойство URL, равно пустой строке.
  * */
 class Entity {
-
   static URL = '';
 
   /**
@@ -12,7 +11,7 @@ class Entity {
    * (в зависимости от того, что наследуется от Entity)
    * */
   static list( data, callback = f => f ) {
-    console.log('Entity.list run');
+//  console.log('Entity.list run');
     return createRequest({
       url: this.URL,
       data: data,
@@ -22,17 +21,13 @@ class Entity {
     })
   }
 
-  static test() {
-    console.log(this.URL);
-  }
-
   /**
    * Создаёт счёт или доход/расход с помощью запроса
    * на сервер. (в зависимости от того,
    * что наследуется от Entity)
    * */
   static create( data, callback = f => f ) {
-    console.log('Entity.create run');
+//  console.log('Entity.create run');
     return createRequest({
       url: this.URL,
       data: Object.assign({_method: 'PUT'}, data),
@@ -47,7 +42,7 @@ class Entity {
    * (в зависимости от того, что наследуется от Entity)
    * */
   static get( id = '', data, callback = f => f ) {
-    console.log('Entity.get run');
+//  console.log('Entity.get run');
     return createRequest({
       url: `${this.URL}/${id}`,
       data: data,
@@ -63,7 +58,7 @@ class Entity {
    * (в зависимости от того, что наследуется от Entity)
    * */
   static remove( id = '', data, callback = f => f ) {
-    console.log('Entity.remove run');
+//  console.log('Entity.remove run');
     return createRequest({
       url: this.URL,
       data: Object.assign({_method: 'DELETE', id: id}, data),
